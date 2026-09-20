@@ -1,3 +1,6 @@
 [submodule "libunwind/rustc"]
 	path = libunwind/rustc
 	url = https://github.com/rust-lang/rust
+	# PSP consumers use the checked-in libunwind archives. The Rust source is
+	# only needed when regenerating those archives via libunwind/Makefile.
+	update = none
