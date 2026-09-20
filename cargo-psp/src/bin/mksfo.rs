@@ -149,6 +149,7 @@ fn main() {
             (EntryType::String, false, false, true, false),
         ),
         ("LANGUAGE", (EntryType::String, false, false, true, false)),
+        ("MEMSIZE", (EntryType::Dword, false, false, true, true)),
         (
             "PARENTAL_LEVEL",
             (EntryType::Dword, false, true, true, true),

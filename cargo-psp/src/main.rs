@@ -71,6 +71,9 @@ struct PspConfig {
     /// Bitmask of allowed regions. (0x8000 is region 2?)
     region: Option<u32>,
 
+    /// Requests the extended 64MiB memory partition on PSP-2000/3000 hardware.
+    memsize: Option<u32>,
+
     /// Japanese localized title.
     title_jp: Option<String>,
 
@@ -313,6 +316,7 @@ fn main() {
             ),
             ("-s", "PSP_SYSTEM_VER", config.psp_system_ver.clone()),
             ("-d", "REGION", config.region.as_ref().map(u32::to_string)),
+            ("-d", "MEMSIZE", config.memsize.as_ref().map(u32::to_string)),
             ("-s", "TITLE_0", config.title_jp.clone()),
             ("-s", "TITLE_2", config.title_fr.clone()),
             ("-s", "TITLE_3", config.title_es.clone()),
