@@ -21,6 +21,10 @@ std = []
 # Compile this library as a stub provider. Useful to compile this as a static
 # library for other projects.
 stub-only = []
+# The global allocator forwards to `__psp_external_alloc`, `__psp_external_dealloc`
+# and `__psp_external_realloc`, which the application defines (and which may fall
+# back on `psp::SystemAlloc`); see `alloc_impl.rs`.
+external-allocator = []
 embedded-graphics = [ "dep:embedded-graphics-core" ]
 
 [dependencies]

@@ -48,6 +48,8 @@ pub mod vram_alloc;
 #[cfg(not(feature = "stub-only"))]
 mod alloc_impl;
 #[cfg(not(feature = "stub-only"))]
+pub use alloc_impl::SystemAlloc;
+#[cfg(not(feature = "stub-only"))]
 pub mod panic;
 
 #[cfg(not(feature = "stub-only"))]

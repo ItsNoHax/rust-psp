@@ -2,8 +2,10 @@ use crate::sys::{self, SceSysMemBlockTypes, SceSysMemPartitionId, SceUid};
 use alloc::alloc::{GlobalAlloc, Layout};
 use core::{mem, ptr};
 
-/// An allocator that hooks directly into the PSP OS memory allocator.
-struct SystemAlloc;
+/// An allocator that hooks directly into the PSP OS memory allocator: every
+/// allocation and free is a kernel call. The global allocator unless the
+/// `external-allocator` feature is enabled.
+pub struct SystemAlloc;
 
 unsafe impl GlobalAlloc for SystemAlloc {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
@@ -49,8 +51,61 @@ unsafe impl GlobalAlloc for SystemAlloc {
     }
 }
 
+#[cfg(not(feature = "external-allocator"))]
 #[global_allocator]
 static ALLOC: SystemAlloc = SystemAlloc;
+
+/// With the `external-allocator` feature the global allocator forwards to
+/// three functions the application defines with `#[no_mangle]`:
+///
+/// ```ignore
+/// #[no_mangle]
+/// unsafe fn __psp_external_alloc(size: usize, align: usize) -> *mut u8;
+/// #[no_mangle]
+/// unsafe fn __psp_external_dealloc(ptr: *mut u8, size: usize, align: usize);
+/// #[no_mangle]
+/// unsafe fn __psp_external_realloc(ptr: *mut u8, size: usize, align: usize, new_size: usize) -> *mut u8;
+/// ```
+///
+/// They may fall back on [`SystemAlloc`]. (A `#[global_allocator]` in the
+/// application itself would leave this crate's `staticlib` without one.)
+#[cfg(feature = "external-allocator")]
+mod external {
+    use alloc::alloc::{GlobalAlloc, Layout};
+
+    extern "Rust" {
+        fn __psp_external_alloc(size: usize, align: usize) -> *mut u8;
+        fn __psp_external_dealloc(ptr: *mut u8, size: usize, align: usize);
+        fn __psp_external_realloc(
+            ptr: *mut u8,
+            size: usize,
+            align: usize,
+            new_size: usize,
+        ) -> *mut u8;
+    }
+
+    struct ExternalAlloc;
+
+    unsafe impl GlobalAlloc for ExternalAlloc {
+        #[inline]
+        unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+            __psp_external_alloc(layout.size(), layout.align())
+        }
+
+        #[inline]
+        unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
+            __psp_external_dealloc(ptr, layout.size(), layout.align())
+        }
+
+        #[inline]
+        unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
+            __psp_external_realloc(ptr, layout.size(), layout.align(), new_size)
+        }
+    }
+
+    #[global_allocator]
+    static ALLOC: ExternalAlloc = ExternalAlloc;
+}
 
 #[cfg(not(feature = "std"))]
 #[alloc_error_handler]
