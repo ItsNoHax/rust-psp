@@ -37,6 +37,7 @@ pub mod debug;
 
 #[macro_use]
 mod vfpu;
+pub mod dcache;
 mod eabi;
 pub mod math;
 pub mod sys;
