@@ -39,6 +39,7 @@ pub mod debug;
 mod vfpu;
 pub mod dcache;
 mod eabi;
+pub mod fpu;
 pub mod math;
 pub mod sys;
 #[cfg(not(feature = "stub-only"))]
