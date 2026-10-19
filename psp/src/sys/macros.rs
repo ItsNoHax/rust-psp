@@ -1,9 +1,14 @@
 #[cfg(target_os = "psp")]
 use crate::sys::SceStubLibraryEntry;
 
+// `psp_extern!` expands in other crates too, which reach `paste!` here.
+#[doc(hidden)]
+pub use paste::paste;
+
 /// A macro that enables the use of `concat!` inside the `#[link_section = ...]`
 /// attribute.
-#[cfg(target_os = "psp")]
+#[doc(hidden)]
+#[macro_export]
 macro_rules! link_section_concat {
     ($(#[link_section = $section:expr] $item:item)*) => {
         $(
@@ -32,13 +37,14 @@ macro_rules! link_section_concat {
 /// Compiling with LTO then only links the functions that are called, and no
 /// more.
 #[cfg(target_os = "psp")]
+#[doc(hidden)]
 #[derive(Copy, Clone)]
-pub(crate) struct Stub {
+pub struct Stub {
     // These are never read, but need to be written into as static items.
     #[allow(dead_code)]
-    pub(crate) lib_addr: &'static SceStubLibraryEntry,
+    pub lib_addr: &'static SceStubLibraryEntry,
     #[allow(dead_code)]
-    pub(crate) nid_addr: &'static u32,
+    pub nid_addr: &'static u32,
 }
 
 /// Calculate the padded length for a library name.
@@ -69,11 +75,30 @@ pub const fn lib_name_bytes<const T: usize>(name: &str) -> [u8; T] {
     buf
 }
 
-/// A complex macro used to define and link a PSP system library.
+/// Imports functions from a PSP system library by NID.
+///
+/// rust-psp binds the standard libraries with this; an application can bind
+/// one it does not, such as a custom firmware's. `name` is the library's
+/// export name and `flags` its stub flags (`0x4001` for a user-mode import,
+/// `0x4009` for a syscall export). Each function gets a stub that the loader
+/// replaces with a `jr $ra; syscall` to the NID, and is exported unmangled
+/// under its own name.
+///
+/// ```ignore
+/// psp::psp_extern! {
+///     #![name = "KUBridge"]
+///     #![flags = 0x4001]
+///     #![version = (0x00, 0x00)]
+///
+///     #[psp(0x7A50075E)]
+///     pub fn kuKernelPeekw(addr: u32) -> u32;
+/// }
+/// ```
+#[macro_export]
 macro_rules! psp_extern {
     // Generate body with default ABI.
     (__BODY $name:ident ($($arg:ident : $arg_ty:ty),*) $(-> $ret:ty)?) => {{
-        paste! {
+        $crate::sys::macros::paste! {
             extern "C" {
                 pub fn [< __ $name _stub >]($($arg : $arg_ty),*) $(-> $ret)?;
             }
@@ -86,7 +111,7 @@ macro_rules! psp_extern {
     (__BODY $abi:ident $name:ident ($($arg:ident : $arg_ty:ty),*) $(-> $ret:ty)?) => {{
         type Func = unsafe extern "C" fn($($arg : $arg_ty),*) $(-> $ret)?;
 
-        paste! {
+        $crate::sys::macros::paste! {
             extern "C" {
                 pub fn [< __ $name _stub >]($($arg : $arg_ty),*) $(-> $ret)?;
             }
@@ -113,14 +138,14 @@ macro_rules! psp_extern {
             $(-> $ret:ty)?;
         )*
     ) => {
-        paste! {
+        $crate::sys::macros::paste! {
             #[allow(non_snake_case)]
             mod [< __ $lib_name _mod >] {
                 #[allow(unused)]
                 use super::*;
 
                 #[cfg(target_os = "psp")]
-                link_section_concat! {
+                $crate::link_section_concat! {
                     #[link_section = concat!(".rodata.sceResident.", $lib_name)]
                     #[allow(non_upper_case_globals)]
                     static [< __ $lib_name _RESIDENT >] : [u8; $crate::sys::macros::lib_name_bytes_len($lib_name)] = $crate::sys::macros::lib_name_bytes($lib_name);
@@ -136,7 +161,7 @@ macro_rules! psp_extern {
                     #[link_section = concat!(".lib.stub.entry.", $lib_name)]
                     #[allow(non_upper_case_globals)]
                     static [< __ $lib_name _STUB >] : $crate::sys::SceStubLibraryEntry = $crate::sys::SceStubLibraryEntry {
-                        name: paste! { & [< __ $lib_name _RESIDENT >] [0] },
+                        name: $crate::sys::macros::paste! { & [< __ $lib_name _RESIDENT >] [0] },
                         version: [$lib_minor_version, $lib_major_version],
                         flags: $lib_flags,
                         len: 5,
@@ -163,7 +188,7 @@ macro_rules! psp_extern {
                     use super::*;
 
                     #[cfg(target_os = "psp")]
-                    link_section_concat! {
+                    $crate::link_section_concat! {
                         #[link_section = concat!(
                             ".rodata.sceNid.", $lib_name,
                             ".", stringify!($name)
@@ -189,7 +214,7 @@ macro_rules! psp_extern {
                     pub unsafe extern "C" fn $name($($arg : $arg_ty),*) $(-> $ret)? {
                         #[cfg(target_os = "psp")]
                         {
-                            psp_extern!(
+                            $crate::psp_extern!(
                                 __BODY $($abi)?
                                 $name($($arg : $arg_ty),*) $(-> $ret)?
                             )
@@ -208,7 +233,7 @@ macro_rules! psp_extern {
             }
         }
 
-        paste! {
+        $crate::sys::macros::paste! {
             $(
                 pub use self :: [< __ $lib_name _mod >] :: $name;
             )*

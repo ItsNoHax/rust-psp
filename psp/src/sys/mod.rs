@@ -32,7 +32,8 @@
 use core::{mem, ptr};
 
 #[macro_use]
-mod macros;
+#[doc(hidden)]
+pub mod macros;
 
 mod ctrl;
 pub use ctrl::*;
