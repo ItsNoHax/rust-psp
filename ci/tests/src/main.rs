@@ -11,10 +11,11 @@ mod bmp_screenshot_test;
 mod gum_test;
 mod math_test;
 mod mem_test;
+mod thread_test;
 mod vfpu_test;
 mod vram_test;
 
-psp::module!("ci_tests", 1, 1);
+psp::module!("ci_tests", 1, 1, thread_test::MAIN_STACK_BYTES);
 
 fn psp_main() {
     let tests = &[
@@ -22,6 +23,7 @@ fn psp_main() {
         gum_test::test_main,
         math_test::test_main,
         mem_test::test_main,
+        thread_test::test_main,
         vfpu_test::test_main,
         vram_test::test_main,
     ];
