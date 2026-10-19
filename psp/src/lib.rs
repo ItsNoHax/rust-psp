@@ -185,9 +185,26 @@ macro_rules! _start {
 ///
 /// You must also define a `fn psp_main() { ... }` function in conjunction with
 /// this macro.
+///
+/// `psp_main` runs on a thread with a 256 KiB stack. An optional fourth
+/// argument gives the stack size in bytes instead. A PSP stack never grows:
+/// a thread that runs past its base writes into whatever lies below it, and
+/// the kernel kills the thread once the stack's bottom word changes. PPSSPP
+/// does not check the bound.
+///
+/// ```ignore
+/// psp::module!("sample_module", 1, 0, 512 * 1024);
+/// ```
 #[macro_export]
 macro_rules! module {
     ($name:expr, $version_major:expr, $version_minor: expr) => {
+        $crate::module!($name, $version_major, $version_minor, 256 * 1024);
+    };
+    ($name:expr, $version_major:expr, $version_minor: expr, $stack_bytes:expr) => {
+        // Evaluated here so that paths in `$stack_bytes` resolve in the caller's module.
+        #[doc(hidden)]
+        const __PSP_MAIN_STACK_BYTES: i32 = ($stack_bytes) as i32;
+
         #[doc(hidden)]
         mod __psp_module {
             #[no_mangle]
@@ -253,8 +270,7 @@ macro_rules! module {
                         main_thread,
                         // default priority of 32.
                         32,
-                        // 256kb stack
-                        256 * 1024,
+                        super::__PSP_MAIN_STACK_BYTES,
                         $crate::sys::ThreadAttributes::USER | $crate::sys::ThreadAttributes::VFPU,
                         core::ptr::null_mut(),
                     );
