@@ -38,6 +38,7 @@ pub mod debug;
 #[macro_use]
 mod vfpu;
 pub mod dcache;
+pub mod fpu;
 mod eabi;
 pub mod math;
 pub mod sys;
