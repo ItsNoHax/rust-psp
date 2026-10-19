@@ -117,27 +117,15 @@ fn aeh(_: Layout) -> ! {
 
 #[no_mangle]
 #[cfg(not(feature = "stub-only"))]
-unsafe extern "C" fn memset(ptr: *mut u8, value: u32, num: usize) -> *mut u8 {
-    let mut i = 0;
-
-    while i < num {
-        *((ptr as usize + i) as *mut u8) = value as u8;
-        i += 1;
-    }
-
+unsafe extern "C" fn memset(ptr: *mut u8, value: i32, num: usize) -> *mut u8 {
+    crate::mem::fill(ptr, value as u8, num);
     ptr
 }
 
 #[no_mangle]
 #[cfg(not(feature = "stub-only"))]
-unsafe extern "C" fn memcpy(dst: *mut u8, src: *const u8, num: isize) -> *mut u8 {
-    let mut i = 0;
-
-    while i < num {
-        *((dst as isize + i) as *mut u8) = *((src as isize + i) as *mut u8);
-        i += 1;
-    }
-
+unsafe extern "C" fn memcpy(dst: *mut u8, src: *const u8, num: usize) -> *mut u8 {
+    crate::mem::copy_forward(dst, src, num);
     dst
 }
 
@@ -163,23 +151,8 @@ unsafe extern "C" fn memcmp(ptr1: *mut u8, ptr2: *mut u8, num: usize) -> i32 {
 
 #[no_mangle]
 #[cfg(not(feature = "stub-only"))]
-unsafe extern "C" fn memmove(dst: *mut u8, src: *mut u8, num: isize) -> *mut u8 {
-    if dst < src {
-        let mut i = 0;
-
-        while i < num {
-            *((dst as isize + i) as *mut u8) = *((src as isize + i) as *mut u8);
-            i += 1;
-        }
-    } else {
-        let mut i = num - 1;
-
-        while i >= 0 {
-            *((dst as isize + i) as *mut u8) = *((src as isize + i) as *mut u8);
-            i -= 1;
-        }
-    }
-
+unsafe extern "C" fn memmove(dst: *mut u8, src: *const u8, num: usize) -> *mut u8 {
+    crate::mem::move_bytes(dst, src, num);
     dst
 }
 

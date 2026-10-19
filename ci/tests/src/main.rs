@@ -10,6 +10,7 @@ use psp::test_runner::TestRunner;
 mod bmp_screenshot_test;
 mod gum_test;
 mod math_test;
+mod mem_test;
 mod vfpu_test;
 mod vram_test;
 
@@ -20,6 +21,7 @@ fn psp_main() {
         bmp_screenshot_test::test_main,
         gum_test::test_main,
         math_test::test_main,
+        mem_test::test_main,
         vfpu_test::test_main,
         vram_test::test_main,
     ];
