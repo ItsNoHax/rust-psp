@@ -56,7 +56,8 @@ unsafe impl GlobalAlloc for SystemAlloc {
 static ALLOC: SystemAlloc = SystemAlloc;
 
 /// With the `external-allocator` feature the global allocator forwards to
-/// three functions the application defines with `#[no_mangle]`:
+/// three functions the application defines with `#[no_mangle]`, and the
+/// allocation error handler to a fourth:
 ///
 /// ```ignore
 /// #[no_mangle]
@@ -65,7 +66,13 @@ static ALLOC: SystemAlloc = SystemAlloc;
 /// unsafe fn __psp_external_dealloc(ptr: *mut u8, size: usize, align: usize);
 /// #[no_mangle]
 /// unsafe fn __psp_external_realloc(ptr: *mut u8, size: usize, align: usize, new_size: usize) -> *mut u8;
+/// #[no_mangle]
+/// fn __psp_external_alloc_error(size: usize, align: usize) -> !;
 /// ```
+///
+/// The last is called when an infallible allocation (`Box::new`,
+/// `Vec::push`, ...) gets a null pointer, with the layout it asked for; it
+/// must not allocate. Without the feature such a failure spins forever.
 ///
 /// They may fall back on [`SystemAlloc`]. (A `#[global_allocator]` in the
 /// application itself would leave this crate's `staticlib` without one.)
@@ -82,6 +89,7 @@ mod external {
             align: usize,
             new_size: usize,
         ) -> *mut u8;
+        fn __psp_external_alloc_error(size: usize, align: usize) -> !;
     }
 
     struct ExternalAlloc;
@@ -105,9 +113,16 @@ mod external {
 
     #[global_allocator]
     static ALLOC: ExternalAlloc = ExternalAlloc;
+
+    #[cfg(not(feature = "std"))]
+    #[alloc_error_handler]
+    fn aeh(layout: Layout) -> ! {
+        // SAFETY: the application defines it (above).
+        unsafe { __psp_external_alloc_error(layout.size(), layout.align()) }
+    }
 }
 
-#[cfg(not(feature = "std"))]
+#[cfg(all(not(feature = "std"), not(feature = "external-allocator")))]
 #[alloc_error_handler]
 fn aeh(_: Layout) -> ! {
     loop {
