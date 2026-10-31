@@ -1,4 +1,4 @@
-use core::f32::{consts::PI, EPSILON, NAN};
+use core::f32::{consts::PI, EPSILON, INFINITY, NAN};
 use psp::math;
 use psp::test_runner::TestRunner;
 
@@ -13,7 +13,16 @@ pub fn test_main(test_runner: &mut TestRunner) {
         ("fminf_NAN", test_fminf(-10.0, NAN), -10.0),
         ("fmaxf", test_fmaxf(-10.0, 3.0), 3.0),
         ("fmaxf_NAN", test_fmaxf(NAN, 3.0), 3.0),
+        ("sqrtf_4", math::sqrtf(4.0), 2.0),
+        ("sqrtf_2", math::sqrtf(2.0), 1.4142135),
+        ("sqrtf_inf", math::sqrtf(INFINITY), INFINITY),
     ]);
+    test_runner.check("sqrtf_neg_zero", math::sqrtf(-0.0).to_bits(), 0x8000_0000);
+    test_runner.check_true("sqrtf_neg", is_qnan(math::sqrtf(-1.0)));
+    test_runner.check_true(
+        "sqrtf_snan",
+        is_qnan(math::sqrtf(f32::from_bits(0x7fa0_0000))),
+    );
     let cos_2_5 = test_cos(2.5) + 0.8011436;
     test_runner.check_true(
         "cos_2.5",
@@ -23,6 +32,11 @@ pub fn test_main(test_runner: &mut TestRunner) {
     test_runner.check_true("sin_pi", almost_zero < EPSILON && almost_zero > -EPSILON);
     let fmodf_0 = test_fmodf(1.0, 0.0);
     test_runner.check_true("fmodf_0", fmodf_0.is_nan());
+}
+
+// Integer check: an FPU compare on a NaN can trap on hardware.
+fn is_qnan(x: f32) -> bool {
+    x.to_bits() & 0x7fc0_0000 == 0x7fc0_0000
 }
 
 fn test_cos(num: f32) -> f32 {

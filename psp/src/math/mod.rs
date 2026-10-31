@@ -97,6 +97,26 @@ pub unsafe extern "C" fn sinf(scalar: f32) -> f32 {
     );
     out
 }
+
+/// `sqrt.s` traps on negative inputs and signaling NaNs, since PSP threads
+/// start with the invalid-operation trap enabled, so those inputs are
+/// handled as integers.
+#[no_mangle]
+pub extern "C" fn sqrtf(mut x: f32) -> f32 {
+    let bits = x.to_bits();
+    if bits > 0x7f80_0000 {
+        return if bits == 0x8000_0000 {
+            x
+        } else if bits & 0x7fff_ffff > 0x7f80_0000 {
+            f32::from_bits(bits | 0x0040_0000)
+        } else {
+            f32::NAN
+        };
+    }
+    unsafe { core::arch::asm!("sqrt.s {0}, {0}", inout(freg) x, options(pure, nomem, nostack)) };
+    x
+}
+
 // borrowed from https://github.com/samcrow/cmsis_dsp.rs/blob/master/src/libm_c.rs
 macro_rules! forward {
     // One argument, argument and return types are the same
@@ -148,7 +168,6 @@ forward! {
     log2f(f32),
     log1p(f64),
     log1pf(f32),
-    sqrtf(f32),
     sqrt(f64),
     cbrtf(f32),
     cbrt(f64),
