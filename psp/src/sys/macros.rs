@@ -1,7 +1,10 @@
 #[cfg(target_os = "psp")]
 use crate::sys::SceStubLibraryEntry;
 
-// `psp_extern!` expands in other crates too, which reach `paste!` here.
+// `psp_extern!` expands in other crates too, which reach `reg` and `paste!`
+// here.
+#[doc(hidden)]
+pub use crate::eabi::reg;
 #[doc(hidden)]
 pub use paste::paste;
 
@@ -117,10 +120,10 @@ macro_rules! psp_extern {
             }
             let func = [< __ $name _stub >] as Func;
 
-            // The transmutes here are for newtypes that fit into a single
-            // register.
+            // The conversions here are for newtypes and small integers that
+            // fit into a single register.
             core::mem::transmute($abi(
-                $(core::mem::transmute($arg)),*,
+                $($crate::sys::macros::reg($arg)),*,
                 core::mem::transmute(func),
             ))
         }

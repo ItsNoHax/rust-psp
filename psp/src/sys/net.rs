@@ -1,4 +1,4 @@
-use crate::eabi::{i5, i6};
+use crate::eabi::{i5, i6, i7, i8, i9, i_i_i_ii_ri};
 use core::ffi::c_void;
 
 #[repr(C)]
@@ -14,7 +14,7 @@ psp_extern! {
     #![flags = 0x0009]
     #![version = (0x00, 0x00)]
 
-    #[psp(0x39AF39A6)]
+    #[psp(0x39AF39A6, i5)]
     /// Initialise the networking library
     ///
     /// # Parameters
@@ -276,7 +276,7 @@ psp_extern! {
     /// 0 on success, < 0 on error.
     pub fn sceNetAdhocctlGetAdhocId(id: *mut SceNetAdhocctlAdhocId) -> i32;
 
-    #[psp(0xA5C055CE)]
+    #[psp(0xA5C055CE, i6)]
     /// Connect to the Adhoc control game mode (as a host)
     ///
     /// # Parameters
@@ -583,7 +583,7 @@ psp_extern! {
         unk1: i32,
     ) -> i32;
 
-    #[psp(0xABED3790)]
+    #[psp(0xABED3790, i7)]
     /// Set a PDP packet to a destination
     ///
     /// # Parameters
@@ -609,7 +609,7 @@ psp_extern! {
         nonblock: i32,
     ) -> i32;
 
-    #[psp(0xDFE53E03)]
+    #[psp(0xDFE53E03, i7)]
     /// Receive a PDP packet
     ///
     /// # Parameters
@@ -729,7 +729,7 @@ psp_extern! {
     /// 0 on success, < 0 on error.
     pub fn sceNetAdhocGameModeDeleteReplica(id: i32) -> i32;
 
-    #[psp(0x877F6D66)]
+    #[psp(0x877F6D66, i8)]
     /// Open a PTP connection
     ///
     /// # Parameters
@@ -775,7 +775,7 @@ psp_extern! {
         nonblock: i32,
     ) -> i32;
 
-    #[psp(0xE08BDAC1)]
+    #[psp(0xE08BDAC1, i7)]
     /// Wait for an incoming PTP connection
     ///
     /// # Parameters
@@ -801,7 +801,7 @@ psp_extern! {
         unk1: i32,
     ) -> i32;
 
-    #[psp(0x9DF81198)]
+    #[psp(0x9DF81198, i5)]
     /// Accept an incoming PTP connection
     ///
     /// # Parameters
@@ -823,7 +823,7 @@ psp_extern! {
         nonblock: i32,
     ) -> i32;
 
-    #[psp(0x4DA4C788)]
+    #[psp(0x4DA4C788, i5)]
     /// Send data
     ///
     /// # Parameters
@@ -845,7 +845,7 @@ psp_extern! {
         nonblock: i32,
     ) -> i32;
 
-    #[psp(0x8BEA2B3E)]
+    #[psp(0x8BEA2B3E, i5)]
     /// Receive data
     ///
     /// # Parameters
@@ -975,7 +975,7 @@ psp_extern! {
     /// 0 on success, < 0 on error
     pub fn sceNetAdhocMatchingTerm() -> i32;
 
-    #[psp(0xCA5EDA6F)]
+    #[psp(0xCA5EDA6F, i9)]
     /// Create an Adhoc matching object
     ///
     /// # Parameters
@@ -1017,7 +1017,7 @@ psp_extern! {
     /// 0 on success, < 0 on error.
     pub fn sceNetAdhocMatchingDelete(matching_id: i32) -> i32;
 
-    #[psp(0x93EF3843)]
+    #[psp(0x93EF3843, i7)]
     /// Start a matching object
     ///
     /// # Parameters
@@ -1743,7 +1743,7 @@ psp_extern! {
     /// 0 on success, < 0 on error.
     pub fn sceHttpDeleteTemplate(templateid: i32) -> i32;
 
-    #[psp(0x8EEFD953)]
+    #[psp(0x8EEFD953, i5)]
     /// Create a http connection.
     ///
     /// # Parameters
@@ -1794,7 +1794,7 @@ psp_extern! {
     /// 0 on success, < 0 on error.
     pub fn sceHttpDeleteConnection(connection_id: i32) -> i32;
 
-    #[psp(0x47347B50)]
+    #[psp(0x47347B50, i_i_i_ii_ri)]
     /// Create a http request.
     ///
     /// # Parameters
@@ -1813,7 +1813,7 @@ psp_extern! {
         content_length: u64,
     ) -> i32;
 
-    #[psp(0xB509B09E)]
+    #[psp(0xB509B09E, i_i_i_ii_ri)]
     /// Create a http request with url.
     ///
     /// # Parameters
@@ -2180,7 +2180,7 @@ psp_extern! {
         err_num: *mut i32,
     ) -> i32;
 
-    #[psp(0xD70D4847)]
+    #[psp(0xD70D4847, i6)]
     pub fn sceHttpGetProxy(
         id: i32,
         activate_flag: *mut i32,
@@ -2199,7 +2199,7 @@ psp_extern! {
         cbfunc: HttpPasswordCB,
     ) -> i32;
 
-    #[psp(0xF0F46C62)]
+    #[psp(0xF0F46C62, i5)]
     pub fn sceHttpSetProxy(
         id: i32,
         activate_flag: i32,
@@ -2269,7 +2269,7 @@ psp_extern! {
     /// 0 on success, < 0 on error
     pub fn sceNetResolverDelete(rid: i32) -> i32;
 
-    #[psp(0x224C5F44)]
+    #[psp(0x224C5F44, i5)]
     /// Begin a name to address lookup
     ///
     /// # Parameters
@@ -2291,7 +2291,7 @@ psp_extern! {
         retry: i32,
     ) -> i32;
 
-    #[psp(0x629E2FB7)]
+    #[psp(0x629E2FB7, i6)]
     /// Begin a address to name lookup
     ///
     /// # Parameters

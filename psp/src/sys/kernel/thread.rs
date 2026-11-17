@@ -7,7 +7,7 @@
 //! version of Puzzle Bobble.
 
 use super::SceUid;
-use crate::eabi::i6;
+use crate::eabi::{i5, i6, i_ii_i_i_ri};
 use core::ffi::c_void;
 
 /// Structure to hold the psp profiler register values
@@ -840,7 +840,7 @@ psp_extern! {
         status: *mut SceKernelThreadRunStatus,
     ) -> i32;
 
-    #[psp(0xD6DA4BA1)]
+    #[psp(0xD6DA4BA1, i5)]
     /// Creates a new semaphore
     ///
     /// # Parameters
@@ -957,7 +957,7 @@ psp_extern! {
         info: *mut SceKernelSemaInfo,
     ) -> i32;
 
-    #[psp(0x19CFF145)]
+    #[psp(0x19CFF145, i5)]
     /// Create a lightweight mutex
     ///
     /// # Parameters
@@ -1132,7 +1132,7 @@ psp_extern! {
         out_bits: *mut u32,
     ) -> i32;
 
-    #[psp(0x402FCF22)]
+    #[psp(0x402FCF22, i5)]
     /// Wait for an event flag for a given bit pattern.
     ///
     /// # Parameters
@@ -1154,7 +1154,7 @@ psp_extern! {
         timeout: *mut u32,
     ) -> i32;
 
-    #[psp(0x328C546A)]
+    #[psp(0x328C546A, i5)]
     /// Wait for an event flag for a given bit pattern with callback.
     ///
     /// # Parameters
@@ -1529,7 +1529,7 @@ psp_extern! {
     /// < 0 on error.
     pub fn sceKernelReferSystemStatus(status: *mut SceKernelSystemStatus) -> i32;
 
-    #[psp(0x7C0DC2A0)]
+    #[psp(0x7C0DC2A0, i5)]
     /// Create a message pipe
     ///
     /// # Parameters
@@ -1563,7 +1563,7 @@ psp_extern! {
     /// 0 on success, < 0 on error
     pub fn sceKernelDeleteMsgPipe(uid: SceUid) -> i32;
 
-    #[psp(0x876DBFAD)]
+    #[psp(0x876DBFAD, i6)]
     /// Send a message to a pipe
     ///
     /// # Parameters
@@ -1587,7 +1587,7 @@ psp_extern! {
         timeout: *mut u32,
     ) -> i32;
 
-    #[psp(0x7C41F2C2)]
+    #[psp(0x7C41F2C2, i6)]
     /// Send a message to a pipe (with callback)
     ///
     /// # Parameters
@@ -1611,7 +1611,7 @@ psp_extern! {
         timeout: *mut u32,
     ) -> i32;
 
-    #[psp(0x884C9F90)]
+    #[psp(0x884C9F90, i5)]
     /// Try to send a message to a pipe
     ///
     /// # Parameters
@@ -1633,7 +1633,7 @@ psp_extern! {
         unk2: *mut c_void,
     ) -> i32;
 
-    #[psp(0x74829B76)]
+    #[psp(0x74829B76, i6)]
     /// Receive a message from a pipe
     ///
     /// # Parameters
@@ -1657,7 +1657,7 @@ psp_extern! {
         timeout: *mut u32,
     ) -> i32;
 
-    #[psp(0xFBFA697D)]
+    #[psp(0xFBFA697D, i6)]
     /// Receive a message from a pipe (with callback)
     ///
     /// # Parameters
@@ -1681,7 +1681,7 @@ psp_extern! {
         timeout: *mut u32,
     ) -> i32;
 
-    #[psp(0xDF52098F)]
+    #[psp(0xDF52098F, i5)]
     /// Receive a message from a pipe
     ///
     /// # Parameters
@@ -1737,7 +1737,7 @@ psp_extern! {
         info: *mut SceKernelMppInfo,
     ) -> i32;
 
-    #[psp(0x56C039B5)]
+    #[psp(0x56C039B5, i5)]
     /// Create a variable pool
     ///
     /// # Parameters
@@ -1877,7 +1877,7 @@ psp_extern! {
         info: *mut SceKernelVplInfo,
     ) -> i32;
 
-    #[psp(0xC07BB470)]
+    #[psp(0xC07BB470, i6)]
     /// Create a fixed pool
     ///
     /// # Parameters
@@ -2262,7 +2262,7 @@ psp_extern! {
         common: *mut c_void,
     ) -> i32;
 
-    #[psp(0x53B00E9A)]
+    #[psp(0x53B00E9A, i_ii_i_i_ri)]
     /// Set the timer handler (wide mode)
     ///
     /// # Parameters
@@ -2310,7 +2310,7 @@ psp_extern! {
         info: *mut SceKernelVTimerInfo,
     ) -> i32;
 
-    #[psp(0x0C106E53)]
+    #[psp(0x0C106E53, i5)]
     /// Register a thread event handler
     ///
     /// # Parameters

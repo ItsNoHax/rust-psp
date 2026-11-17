@@ -862,7 +862,7 @@ psp_extern! {
         option: *mut SceKernelSMOption,
     ) -> i32;
 
-    #[psp(0xD1FF982A)]
+    #[psp(0xD1FF982A, i5)]
     /// Stop a running module.
     ///
     /// # Parameters
