@@ -11,6 +11,7 @@ mod alloc_test;
 mod bmp_screenshot_test;
 mod extern_test;
 mod fpu_test;
+mod gu_test;
 mod gum_test;
 mod math_test;
 mod mem_test;
@@ -26,6 +27,7 @@ fn psp_main() {
         bmp_screenshot_test::test_main,
         extern_test::test_main,
         fpu_test::test_main,
+        gu_test::test_main,
         gum_test::test_main,
         math_test::test_main,
         mem_test::test_main,

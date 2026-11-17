@@ -2867,8 +2867,8 @@ pub unsafe extern "C" fn sceGuTexFunc(tfx: TextureEffect, tcc: TextureColorCompo
 /// # Parameters
 ///
 /// - `mipmap`: Mipmap level
-/// - `width`: Width of texture map (must be a power of 2)
-/// - `height`: Height of texture map (must be a power of 2)
+/// - `width`: Width of texture map (must be a power of 2, at most 512)
+/// - `height`: Height of texture map (must be a power of 2, at most 512)
 /// - `tbw`: Texture Buffer Width (block-aligned). For `PixelFormat::8888`, this
 ///    seems to have to be a multiple of 4. This value indicates the actual
 ///    width of the image, not the width of the texture map.
@@ -2904,7 +2904,11 @@ pub unsafe extern "C" fn sceGuTexImage(
     tbw: i32,
     tbp: *const c_void,
 ) {
-    use core::intrinsics::ctlz;
+    // log2 of a dimension, as `TSIZE` encodes it. The GE addresses at most
+    // 512 texels on an axis, so a larger dimension is declared as 512.
+    fn size_log2(dim: i32) -> i32 {
+        31 - (dim.clamp(1, 512) as u32).leading_zeros() as i32
+    }
 
     const TBP_CMD_TBL: [GeCommand; 8] = [
         GeCommand::TexAddr0,
@@ -2946,7 +2950,7 @@ pub unsafe extern "C" fn sceGuTexImage(
     );
     send_command_i(
         TSIZE_CMD_TBL[mipmap as usize],
-        (((31 - ctlz(height & 0x3ff)) << 8) | (31 - ctlz(width & 0x3ff))) as i32,
+        (size_log2(height) << 8) | size_log2(width),
     );
     sceGuTexFlush();
 }
