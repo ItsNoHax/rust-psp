@@ -9,6 +9,7 @@ use psp::test_runner::TestRunner;
 
 mod abi_test;
 mod alloc_test;
+mod args_test;
 mod bmp_screenshot_test;
 mod extern_test;
 mod fpu_test;
@@ -26,6 +27,7 @@ fn psp_main() {
     let tests = &[
         abi_test::test_main,
         alloc_test::test_main,
+        args_test::test_main,
         bmp_screenshot_test::test_main,
         extern_test::test_main,
         fpu_test::test_main,

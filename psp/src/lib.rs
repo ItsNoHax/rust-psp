@@ -37,6 +37,7 @@ pub mod debug;
 
 #[macro_use]
 mod vfpu;
+pub mod args;
 pub mod dcache;
 mod eabi;
 pub mod fpu;
@@ -194,6 +195,9 @@ macro_rules! _start {
 /// the kernel kills the thread once the stack's bottom word changes. PPSSPP
 /// does not check the bound.
 ///
+/// The start arguments (`argv[0]` is the EBOOT's path) are kept for
+/// [`args::args`] before `psp_main` runs.
+///
 /// ```ignore
 /// psp::module!("sample_module", 1, 0, 512 * 1024);
 /// ```
@@ -263,6 +267,8 @@ macro_rules! module {
             #[no_mangle]
             extern "C" fn module_start(argc_bytes: usize, argv: *mut c_void) -> isize {
                 extern "C" fn main_thread(argc: usize, argv: *mut c_void) -> i32 {
+                    // SAFETY: the system copied `argc` bytes to `argv`.
+                    unsafe { $crate::args::init(argc, argv as *const u8) };
                     $crate::_start!(super::psp_main, argc, argv)
                 }
 
